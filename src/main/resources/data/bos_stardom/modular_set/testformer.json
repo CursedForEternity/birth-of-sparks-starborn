@@ -1,0 +1,11 @@
+{
+  "torso": {
+    "alt": "bos_starborn:geo/parts/testformer/alt.geo.json",
+    "propulsion": "CAR"
+  },
+  "head": {},
+  "right_arm": {},
+  "left_arm": {},
+  "right_leg": {},
+  "left_leg": {}
+}
