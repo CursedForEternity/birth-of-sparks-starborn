@@ -3,6 +3,7 @@ package cursed.bos_starborn.core;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 
 public record ModularSet(
@@ -43,15 +44,15 @@ public record ModularSet(
 
     public record TorsoPart(
             ResourceLocation model,
-            ResourceLocation texture,
+            List<TextureLayer> layers,
             @Nullable ResourceLocation altModel,
-            @Nullable ResourceLocation altTexture,
+            List<TextureLayer> altLayers,
             PropulsionType propulsion,
             @Nullable ResourceLocation animation
     ) {}
 
     public record LimbPart(
             ResourceLocation model,
-            ResourceLocation texture
+            List<TextureLayer> layers
     ) {}
 }

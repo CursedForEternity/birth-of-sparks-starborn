@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import cursed.bos_starborn.core.ModularSet;
 import cursed.bos_starborn.core.ModularSetManager;
+import cursed.bos_starborn.core.TextureLayer;
 import cursed.bos_starborn.core.TransformerPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -25,14 +26,13 @@ public class ModularLimbLayer extends GeoRenderLayer<TransformerPlayer> {
                               RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer,
                               float partialTick, int packedLight, int packedOverlay) {
 
-        // In alt/vehicle mode, skip robot limbs if the torso switched to its alt model
         if (animatable.isAltMode()) return;
 
         // 1. Map bone name ("head", "right_arm", etc.) to PartSlot
         ModularSet.PartSlot slot = ModularSet.PartSlot.fromBoneName(bone.getName());
         if (slot == null) return;
 
-        // 2. Look up the ModularSet equipped in this specific limb slot
+        // 2. Look up the ModularSet equipped in this limb slot
         ModularSet set = ModularSetManager.getSet(animatable.getLimbSetId(slot));
         if (set == null) return;
 
@@ -43,18 +43,23 @@ public class ModularLimbLayer extends GeoRenderLayer<TransformerPlayer> {
         BakedGeoModel limbModel = GeckoLibCache.getBakedModels().get(part.model());
         if (limbModel == null) return;
 
-        // 4. Render at the socket bone's pivot
-        RenderType limbRenderType = RenderType.entityCutoutNoCull(part.texture());
-        VertexConsumer limbBuffer = bufferSource.getBuffer(limbRenderType);
-
         poseStack.pushPose();
         RenderUtils.translateToPivotPoint(poseStack, bone);
 
-        getRenderer().reRender(
-                limbModel, poseStack, bufferSource, animatable, limbRenderType,
-                limbBuffer, partialTick, packedLight, packedOverlay,
-                1.0f, 1.0f, 1.0f, 1.0f
-        );
+        for (TextureLayer layer : part.layers()) {
+            RenderType limbRenderType = layer.emissive()
+                    ? RenderType.entityTranslucentEmissive(layer.texture())
+                    : RenderType.entityCutoutNoCull(layer.texture());
+
+            VertexConsumer limbBuffer = bufferSource.getBuffer(limbRenderType);
+            int light = layer.getPackedLight(packedLight);
+
+            getRenderer().reRender(
+                    limbModel, poseStack, bufferSource, animatable, limbRenderType,
+                    limbBuffer, partialTick, light, packedOverlay,
+                    layer.red(), layer.green(), layer.blue(), layer.alpha()
+            );
+        }
 
         poseStack.popPose();
     }

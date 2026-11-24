@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
+import static cursed.bos_starborn.core.TransformerPlayer.getOrCreateAnimatable;
+
 @Mod.EventBusSubscriber(modid = BOS.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientEvents {
 
@@ -26,17 +28,14 @@ public class ClientEvents {
     public static void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
         Player player = event.getEntity();
         if (!(player instanceof AbstractClientPlayer clientPlayer)) return;
-
+        TransformerPlayer animatable = getOrCreateAnimatable(clientPlayer.getUUID());
+        if (animatable.getTorsoSetId() == null) return;
         // Cancel vanilla player rendering
         event.setCanceled(true);
 
         if (renderer == null) {
             renderer = new ModularPlayerRenderer();
         }
-
-        TransformerPlayer animatable = ANIMATABLE_CACHE.computeIfAbsent(
-                clientPlayer.getUUID(), uuid -> new TransformerPlayer()
-        );
         animatable.setPlayer(clientPlayer);
 
         PoseStack poseStack = event.getPoseStack();

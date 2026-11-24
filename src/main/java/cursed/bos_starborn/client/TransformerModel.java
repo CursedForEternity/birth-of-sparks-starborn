@@ -34,11 +34,13 @@ public class TransformerModel extends GeoModel<TransformerPlayer> {
         if (set == null) {
             return new ResourceLocation(BOS.MODID, "textures/entity/parts/testformer/testformer.png");
         }
-        if (animatable.isAltMode() && set.torso().altTexture() != null) {
-            return set.torso().altTexture();
+        var layers = animatable.isAltMode() ? set.torso().altLayers() : set.torso().layers();
+        if (layers.isEmpty()) {
+            return new ResourceLocation(BOS.MODID, "textures/entity/parts/testformer/testformer.png");
         }
-        return set.torso().texture();
+        return layers.get(0).texture();
     }
+
 
     @Override
     public ResourceLocation getAnimationResource(TransformerPlayer animatable) {
