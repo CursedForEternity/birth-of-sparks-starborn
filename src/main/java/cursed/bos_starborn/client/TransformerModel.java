@@ -14,7 +14,7 @@ import software.bernie.geckolib.model.GeoModel;
 public class TransformerModel extends GeoModel<TransformerPlayer> {
 
     private static final ResourceLocation FALLBACK_ANIM =
-            new ResourceLocation(BOS.MODID, "animations/modular_player.animation.json");
+            new ResourceLocation(BOS.MODID, "animations/morph/testformer.animation.json");
 
     @Override
     public ResourceLocation getModelResource(TransformerPlayer animatable) {
