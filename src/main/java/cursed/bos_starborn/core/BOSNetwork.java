@@ -24,5 +24,13 @@ public class BOSNetwork {
                 SyncModularLoadoutPacket::decode,
                 SyncModularLoadoutPacket::handle
         );
+
+        CHANNEL.registerMessage(
+                packetId++,
+                ToggleAltModePacket.class,
+                ToggleAltModePacket::encode,
+                ToggleAltModePacket::decode,
+                ToggleAltModePacket::handle
+        );
     }
 }

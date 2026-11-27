@@ -1,0 +1,31 @@
+{
+  "torso": {
+    "alt": "bos_starborn:geo/parts/testmorph/alt.geo.json",
+    "propulsion": "CAR",
+    "layers": [
+      { "texture": "bos_starborn:textures/entity/parts/testmorph/testmorph_tint.png", "color": "#DDFFFF" },
+      { "texture": "bos_starborn:textures/entity/parts/testmorph/testmorph_glow.png", "color": "#FFDDFF", "tintable": true }
+    ]
+  },
+  "head": {"layers": [
+    { "texture": "bos_starborn:textures/entity/parts/testmorph/testmorph_tint.png", "color": "#DDFFFF" },
+    { "texture": "bos_starborn:textures/entity/parts/testmorph/testmorph_glow.png", "color": "#00FFFF", "tintable": true }
+  ]
+  },
+  "right_arm": {"layers": [
+    { "texture": "bos_starborn:textures/entity/parts/testmorph/testmorph_tint.png", "color": "#0000FF" }
+  ]
+  },
+  "left_arm": {"layers": [
+    { "texture": "bos_starborn:textures/entity/parts/testmorph/testmorph_tint.png", "color": "#DDFFFF" }
+  ]
+  },
+  "right_leg": {"layers": [
+    { "texture": "bos_starborn:textures/entity/parts/testmorph/testmorph_tint.png", "color": "#DDFFFF" }
+  ]
+  },
+  "left_leg": {"layers": [
+    { "texture": "bos_starborn:textures/entity/parts/testmorph/testmorph_tint.png", "color": "#DDFFFF" }
+  ]
+  }
+}

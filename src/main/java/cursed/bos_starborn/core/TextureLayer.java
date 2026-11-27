@@ -47,7 +47,7 @@ public record TextureLayer(
      */
     public TextureLayer withDynamicTint(float overrideR, float overrideG, float overrideB) {
         if (!this.tintable) {
-            return this; // Disallowed from tinting: stays untouched!
+            return this;
         }
         return new TextureLayer(this.texture, overrideR, overrideG, overrideB, this.alpha, this.emissive, true);
     }

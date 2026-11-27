@@ -28,9 +28,7 @@ public class TorsoOverlayLayer extends GeoRenderLayer<TransformerPlayer> {
                 ? set.torso().altLayers()
                 : set.torso().layers();
 
-        // Layer 0 is already drawn as the base texture; render extra color masks & _glow layers (index 1+)
-        for (int i = 1; i < layers.size(); i++) {
-            TextureLayer layer = layers.get(i);
+        for (TextureLayer layer : layers) {
             RenderType layerType = layer.emissive()
                     ? RenderType.entityTranslucentEmissive(layer.texture())
                     : RenderType.entityCutoutNoCull(layer.texture());

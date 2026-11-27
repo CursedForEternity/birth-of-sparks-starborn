@@ -37,35 +37,40 @@ public class ServerPlayerEvents {
 
     @SubscribeEvent
     public static void onStartTracking(PlayerEvent.StartTracking event) {
-        // When another player walks into render range, sync their modular parts to the observer
         if (event.getTarget() instanceof ServerPlayer targetPlayer &&
-            event.getEntity() instanceof ServerPlayer observerPlayer) {
+                event.getEntity() instanceof ServerPlayer observerPlayer) {
             syncLoadoutToClient(targetPlayer, observerPlayer);
         }
     }
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        // Copy persistent modular loadout across death/end-portal clones
         CompoundTag oldData = event.getOriginal().getPersistentData();
         CompoundTag newData = event.getEntity().getPersistentData();
 
-        if (oldData.contains("bos_torso")) {
-            newData.putString("bos_torso", oldData.getString("bos_torso"));
-            newData.putString("bos_head", oldData.getString("bos_head"));
-            newData.putString("bos_arms", oldData.getString("bos_arms"));
-            newData.putString("bos_legs", oldData.getString("bos_legs"));
+        for (String key : new String[]{"bos_torso", "bos_head", "bos_arms", "bos_legs"}) {
+            if (oldData.contains(key)) {
+                newData.putString(key, oldData.getString(key));
+            }
         }
+    }
+
+    private static ResourceLocation parseSlotId(CompoundTag tag, String key, ResourceLocation fallback) {
+        if (!tag.contains(key)) return fallback;
+        String raw = tag.getString(key);
+        if (raw == null || raw.isBlank()) return fallback;
+        ResourceLocation parsed = ResourceLocation.tryParse(raw);
+        return parsed != null ? parsed : fallback;
     }
 
     public static void syncLoadoutToClient(ServerPlayer sourcePlayer, ServerPlayer recipientPlayer) {
         CompoundTag tag = sourcePlayer.getPersistentData();
-        if (!tag.contains("bos_torso")) return;
+        ResourceLocation torso = parseSlotId(tag, "bos_torso", null);
+        if (torso == null) return;
 
-        ResourceLocation torso = new ResourceLocation(tag.getString("bos_torso"));
-        ResourceLocation head = new ResourceLocation(tag.getString("bos_head"));
-        ResourceLocation arms = new ResourceLocation(tag.getString("bos_arms"));
-        ResourceLocation legs = new ResourceLocation(tag.getString("bos_legs"));
+        ResourceLocation head = parseSlotId(tag, "bos_head", torso);
+        ResourceLocation arms = parseSlotId(tag, "bos_arms", torso);
+        ResourceLocation legs = parseSlotId(tag, "bos_legs", torso);
 
         SyncModularLoadoutPacket packet = new SyncModularLoadoutPacket(
                 sourcePlayer.getUUID(), torso, head, arms, legs

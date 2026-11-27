@@ -35,7 +35,7 @@ public class BosCommands {
         dispatcher.register(
                 Commands.literal("bos")
                         .requires(source -> source.hasPermission(2))
-                        .then(Commands.literal("modular_set")
+                        .then(Commands.literal("modular_sets")
                                 .then(Commands.argument("torso", StringArgumentType.string())
                                         .suggests(SET_SUGGESTIONS)
                                         .executes(ctx -> applySet(ctx,
@@ -74,7 +74,6 @@ public class BosCommands {
 
     private static ResourceLocation parseSetId(String raw) {
         if (raw == null || raw.isEmpty()) return null;
-        // If user types "bumblebee" without a namespace, defaults to "bos_starborn:bumblebee"
         return raw.contains(":")
                 ? ResourceLocation.tryParse(raw)
                 : new ResourceLocation(BOS.MODID, raw);

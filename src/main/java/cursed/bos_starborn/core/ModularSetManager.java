@@ -11,6 +11,7 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 @Mod.EventBusSubscriber(modid = BOS.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -21,6 +22,13 @@ public class ModularSetManager extends SimpleJsonResourceReloadListener {
 
     public ModularSetManager() {
         super(GSON, "modular_sets");
+    }
+
+    @Nullable
+    public static ResourceLocation getFirstSetId() {
+        return SETS.keySet().stream()
+                .min(Comparator.comparing(ResourceLocation::toString))
+                .orElse(null);
     }
 
     @SubscribeEvent
@@ -34,7 +42,7 @@ public class ModularSetManager extends SimpleJsonResourceReloadListener {
 
         objects.forEach((fileId, jsonElement) -> {
             try {
-                JsonObject root = GsonHelper.convertToJsonObject(jsonElement, "modular_set");
+                JsonObject root = GsonHelper.convertToJsonObject(jsonElement, "modular_sets");
                 String namespace = fileId.getNamespace();
                 String folderName = fileId.getPath();
 
@@ -71,10 +79,16 @@ public class ModularSetManager extends SimpleJsonResourceReloadListener {
 
         ResourceLocation altModel = obj.has("alt")
                 ? new ResourceLocation(GsonHelper.getAsString(obj, "alt")) : null;
-        ResourceLocation defaultAltTex = new ResourceLocation(namespace, "textures/entity/parts/" + folder + "/alt.png");
-        List<TextureLayer> altLayers = (altModel != null)
-                ? parseLayers(obj, "alt_layers", "alt_texture", defaultAltTex)
-                : List.of();
+
+        List<TextureLayer> altLayers;
+        if (altModel == null) {
+            altLayers = List.of();
+        } else if (obj.has("alt_layers") || obj.has("alt_texture")) {
+            ResourceLocation defaultAltTex = new ResourceLocation(namespace, "textures/entity/parts/" + folder + "/alt.png");
+            altLayers = parseLayers(obj, "alt_layers", "alt_texture", defaultAltTex);
+        } else {
+            altLayers = layers;
+        }
 
         String propStr = GsonHelper.getAsString(obj, "propulsion", "NONE").toUpperCase();
         ModularSet.PropulsionType propulsion = ModularSet.PropulsionType.valueOf(propStr);

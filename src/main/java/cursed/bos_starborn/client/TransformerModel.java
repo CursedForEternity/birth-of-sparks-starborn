@@ -5,6 +5,7 @@ import cursed.bos_starborn.core.ModularSet;
 import cursed.bos_starborn.core.ModularSetManager;
 import cursed.bos_starborn.core.TransformerPlayer;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
@@ -13,42 +14,47 @@ import software.bernie.geckolib.model.GeoModel;
 
 public class TransformerModel extends GeoModel<TransformerPlayer> {
 
-    private static final ResourceLocation FALLBACK_ANIM =
-            new ResourceLocation(BOS.MODID, "animations/morph/testformer.animation.json");
+    private ModularSet resolveTorsoSet(TransformerPlayer animatable) {
+        ModularSet set = ModularSetManager.getSet(animatable.getTorsoSetId());
+        if (set != null) return set;
+
+        ResourceLocation firstId = ModularSetManager.getFirstSetId();
+        return firstId != null ? ModularSetManager.getSet(firstId) : null;
+    }
 
     @Override
     public ResourceLocation getModelResource(TransformerPlayer animatable) {
-        ModularSet set = ModularSetManager.getSet(animatable.getTorsoSetId());
-        if (set == null) {
-            return new ResourceLocation(BOS.MODID, "geo/parts/testformer/torso.geo.json");
+        ModularSet set = resolveTorsoSet(animatable);
+        if (set != null) {
+            if (animatable.isAltMode() && set.torso().altModel() != null) {
+                return set.torso().altModel();
+            }
+            if (set.torso().model() != null) {
+                return set.torso().model();
+            }
         }
-        if (animatable.isAltMode() && set.torso().altModel() != null) {
-            return set.torso().altModel();
-        }
-        return set.torso().model();
+        return MissingTextureAtlasSprite.getLocation();
     }
 
     @Override
     public ResourceLocation getTextureResource(TransformerPlayer animatable) {
-        ModularSet set = ModularSetManager.getSet(animatable.getTorsoSetId());
-        if (set == null) {
-            return new ResourceLocation(BOS.MODID, "textures/entity/parts/testformer/testformer.png");
+        ModularSet set = resolveTorsoSet(animatable);
+        if (set != null) {
+            var layers = animatable.isAltMode() ? set.torso().altLayers() : set.torso().layers();
+            if (!layers.isEmpty()) {
+                return layers.get(0).texture();
+            }
         }
-        var layers = animatable.isAltMode() ? set.torso().altLayers() : set.torso().layers();
-        if (layers.isEmpty()) {
-            return new ResourceLocation(BOS.MODID, "textures/entity/parts/testformer/testformer.png");
-        }
-        return layers.get(0).texture();
+        return MissingTextureAtlasSprite.getLocation();
     }
-
 
     @Override
     public ResourceLocation getAnimationResource(TransformerPlayer animatable) {
-        ModularSet set = ModularSetManager.getSet(animatable.getTorsoSetId());
+        ModularSet set = resolveTorsoSet(animatable);
         if (set != null && set.torso().animation() != null) {
             return set.torso().animation();
         }
-        return FALLBACK_ANIM;
+        return MissingTextureAtlasSprite.getLocation();
     }
 
     @Override
@@ -79,7 +85,6 @@ public class TransformerModel extends GeoModel<TransformerPlayer> {
         CoreGeoBone rightLeg = getAnimationProcessor().getBone("right_leg");
         CoreGeoBone leftLeg = getAnimationProcessor().getBone("left_leg");
 
-        // Legs swing opposite each other
         if (rightLeg != null) {
             rightLeg.setRotX(Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount);
         }
