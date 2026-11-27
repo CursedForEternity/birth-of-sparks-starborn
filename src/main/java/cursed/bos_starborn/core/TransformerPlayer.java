@@ -25,6 +25,15 @@ public class TransformerPlayer implements GeoAnimatable {
     public boolean altMode = false;
     private ResourceLocation torsoSetId;
     private final Map<ModularSet.PartSlot, ResourceLocation> limbSetIds = new EnumMap<>(ModularSet.PartSlot.class);
+    private boolean morphed = false;
+
+    public boolean isMorphed() {
+        return morphed;
+    }
+
+    public void setMorphed(boolean morphed) {
+        this.morphed = morphed;
+    }
 
     public TransformerPlayer() {
         ResourceLocation initialSet = ModularSetManager.getFirstSetId();

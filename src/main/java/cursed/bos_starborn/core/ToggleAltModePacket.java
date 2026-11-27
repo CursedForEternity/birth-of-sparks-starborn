@@ -1,12 +1,14 @@
 package cursed.bos_starborn.core;
 
-import cursed.bos_starborn.server.ServerPlayerEvents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
+
+import static cursed.bos_starborn.core.TransformerPersistenceEvents.parseOrDefault;
 
 public record ToggleAltModePacket(boolean altMode) {
 
@@ -17,27 +19,26 @@ public record ToggleAltModePacket(boolean altMode) {
     public static ToggleAltModePacket decode(FriendlyByteBuf buf) {
         return new ToggleAltModePacket(buf.readBoolean());
     }
-
     public static void handle(ToggleAltModePacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) return;
 
-            CompoundTag tag = player.getPersistentData();
-            boolean newAlt = msg.altMode;
-            tag.putBoolean("bos_alt_mode", newAlt);
+            CompoundTag persisted = player.getPersistentData()
+                    .getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+            ResourceLocation fallback = ModularSetManager.getFirstSetId();
 
-            // Re-sync loadout/state to self and tracking players
-            ServerPlayerEvents.syncLoadoutToClient(player, player);
-            player.serverLevel().players().forEach(other -> {
-                if (other != player) {
-                    ServerPlayerEvents.syncLoadoutToClient(player, other);
-                }
-            });
+            ResourceLocation torsoId = parseOrDefault(persisted.getString(TransformerPersistenceEvents.TAG_TORSO), fallback);
+            ResourceLocation headId  = parseOrDefault(persisted.getString(TransformerPersistenceEvents.TAG_HEAD), torsoId);
+            ResourceLocation armsId  = parseOrDefault(persisted.getString(TransformerPersistenceEvents.TAG_ARMS), torsoId);
+            ResourceLocation legsId  = parseOrDefault(persisted.getString(TransformerPersistenceEvents.TAG_LEGS), torsoId);
 
-            // TODO: If you add a dedicated SyncAltModePacket(UUID, boolean) or add `altMode`
-            // to SyncModularLoadoutPacket, send it here via BOSNetwork.CHANNEL.send(
-            // PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player), ... )
+            boolean morphed = !persisted.contains(TransformerPersistenceEvents.TAG_MORPHED)
+                    || persisted.getBoolean(TransformerPersistenceEvents.TAG_MORPHED);
+
+            TransformerPersistenceEvents.saveAndSync(
+                    player, morphed, msg.altMode, torsoId, headId, armsId, legsId
+            );
         });
         ctx.get().setPacketHandled(true);
     }

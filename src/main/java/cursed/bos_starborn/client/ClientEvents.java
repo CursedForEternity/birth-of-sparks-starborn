@@ -29,7 +29,7 @@ public class ClientEvents {
         Player player = event.getEntity();
         if (!(player instanceof AbstractClientPlayer clientPlayer)) return;
         TransformerPlayer animatable = getOrCreateAnimatable(clientPlayer.getUUID());
-        if (animatable.getTorsoSetId() == null) return;
+        if (!animatable.isMorphed() || animatable.getTorsoSetId() == null) return;
         // Cancel vanilla player rendering
         event.setCanceled(true);
 

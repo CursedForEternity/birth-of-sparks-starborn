@@ -106,11 +106,15 @@ public class BosCommands {
             return 0;
         }
 
-        var tag = player.getPersistentData();
-        tag.putString("bos_torso", torsoId.toString());
-        tag.putString("bos_head", headId.toString());
-        tag.putString("bos_arms", armsId.toString());
-        tag.putString("bos_legs", legsId.toString());
+        var persisted = player.getPersistentData()
+                .getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+        boolean currentMorphed = !persisted.contains(TransformerPersistenceEvents.TAG_MORPHED)
+                || persisted.getBoolean(TransformerPersistenceEvents.TAG_MORPHED);
+        boolean currentAltMode = persisted.getBoolean(TransformerPersistenceEvents.TAG_ALT_MODE);
+
+        TransformerPersistenceEvents.saveAndSync(
+                player, currentMorphed, currentAltMode, torsoId, headId, armsId, legsId
+        );
 
         SyncModularLoadoutPacket packet = new SyncModularLoadoutPacket(
                 player.getUUID(), torsoId, headId, armsId, legsId
